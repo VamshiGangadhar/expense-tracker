@@ -122,6 +122,7 @@ export default function ExpenseTracker() {
                       <SelectItem value="entertainment">
                         Entertainment
                       </SelectItem>
+                      <SelectItem value="livingessentials">Living Essentials</SelectItem>
                       <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
@@ -183,6 +184,16 @@ export default function ExpenseTracker() {
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
+                  <span>Living Essentials</span>
+                  <span>
+                    ₹
+                    {expenses
+                      .filter((e) => e.category === "livingessentials")
+                      .reduce((sum, e) => sum + e.amount, 0)
+                      .toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
                   <span>Other</span>
                   <span>
                     ₹
@@ -223,8 +234,7 @@ export default function ExpenseTracker() {
               {filteredExpenses.map((expense) => (
                 <div
                   key={expense.id}
-                  className="flex items-center justify-between p-4 bg-white rounded-lg shadow"
-                >
+                  className="flex items-center justify-between p-4 bg-white rounded-lg shadow">
                   <div className="flex items-center space-x-4">
                     <div className="p-2 bg-blue-100 rounded-full">
                       {expense.category === "food" && (
@@ -238,6 +248,9 @@ export default function ExpenseTracker() {
                       )}
                       {expense.category === "entertainment" && (
                         <IndianRupee className="h-6 w-6 text-purple-500" />
+                      )}
+                      {expense.category === "livingessentials" && (
+                        <IndianRupee className="h-6 w-6 text-orange-500" />
                       )}
                       {expense.category === "other" && (
                         <IndianRupee className="h-6 w-6 text-gray-500" />
