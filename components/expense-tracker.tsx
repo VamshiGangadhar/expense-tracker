@@ -214,6 +214,7 @@ export default function ExpenseTracker() {
                   <SelectItem value="transport">Transport</SelectItem>
                   <SelectItem value="utilities">Utilities</SelectItem>
                   <SelectItem value="entertainment">Entertainment</SelectItem>
+                  <SelectItem value="livingessentials">Living Essentials</SelectItem>
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
