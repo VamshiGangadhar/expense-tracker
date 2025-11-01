@@ -33,6 +33,7 @@ export default function MonthlyExpenseSheet() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
 
   useEffect(() => {
+    setLoading(true);
     axios
       .get(
         "https://expense-tracker-backend-delta-seven.vercel.app/api/expenses/get_expenses"
@@ -40,8 +41,12 @@ export default function MonthlyExpenseSheet() {
       .then((response) => {
         const expensesData = response.data;
         setExpenses(expensesData);
+        setLoading(false);
       })
-      .catch((error) => console.error("Failed to fetch expenses:", error));
+      .catch((error) => {
+        console.error("Failed to fetch expenses:", error);
+        setLoading(false);
+      });
   }, []);
 
   const [selectedMonth, setSelectedMonth] = useState(
@@ -50,49 +55,7 @@ export default function MonthlyExpenseSheet() {
   const [selectedYear, setSelectedYear] = useState(
     new Date().getFullYear().toString()
   );
-
-  useEffect(() => {
-    // In a real application, you would fetch the expenses from an API or local storage here
-    // For this example, we'll use some dummy data
-    const dummyExpenses: Expense[] = [
-      {
-        id: 1,
-        description: "Groceries",
-        amount: 5000,
-        category: "food",
-        date: "2023-05-01",
-      },
-      {
-        id: 2,
-        description: "Electricity Bill",
-        amount: 2000,
-        category: "utilities",
-        date: "2023-05-05",
-      },
-      {
-        id: 3,
-        description: "Movie Night",
-        amount: 1000,
-        category: "entertainment",
-        date: "2023-05-15",
-      },
-      {
-        id: 4,
-        description: "Bus Pass",
-        amount: 1500,
-        category: "transport",
-        date: "2023-05-01",
-      },
-      {
-        id: 5,
-        description: "New Shoes",
-        amount: 3000,
-        category: "other",
-        date: "2023-05-20",
-      },
-    ];
-    setExpenses(dummyExpenses);
-  }, []);
+  const [loading, setLoading] = useState(true);
 
   const filteredExpenses = expenses.filter((expense) => {
     const expenseDate = new Date(expense.date);
@@ -173,36 +136,56 @@ export default function MonthlyExpenseSheet() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead className="text-right">Amount (INR)</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredExpenses.map((expense) => (
-                  <TableRow key={expense.id}>
-                    <TableCell>{expense.date}</TableCell>
-                    <TableCell>{expense.description}</TableCell>
-                    <TableCell>{expense.category}</TableCell>
-                    <TableCell className="text-right">
-                      ₹{expense.amount.toFixed(2)}
-                    </TableCell>
+            {loading ? (
+              <div className="text-center py-8">Loading expenses...</div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead className="text-right">Amount (INR)</TableHead>
                   </TableRow>
-                ))}
-                <TableRow>
-                  <TableCell colSpan={3} className="font-bold">
-                    Total
-                  </TableCell>
-                  <TableCell className="text-right font-bold">
-                    ₹{totalExpenses.toFixed(2)}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredExpenses.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={4}
+                        className="text-center py-8 text-gray-500"
+                      >
+                        No expenses found for {months[parseInt(selectedMonth)]}{" "}
+                        {selectedYear}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    <>
+                      {filteredExpenses.map((expense) => (
+                        <TableRow key={expense.id}>
+                          <TableCell>{expense.date}</TableCell>
+                          <TableCell>{expense.description}</TableCell>
+                          <TableCell className="capitalize">
+                            {expense.category}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            ₹{expense.amount.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      <TableRow>
+                        <TableCell colSpan={3} className="font-bold">
+                          Total
+                        </TableCell>
+                        <TableCell className="text-right font-bold">
+                          ₹{totalExpenses.toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                    </>
+                  )}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
 
