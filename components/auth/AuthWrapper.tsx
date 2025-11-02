@@ -21,9 +21,12 @@ export default function AuthWrapper({
   useEffect(() => {
     const checkAuthStatus = async () => {
       const token = localStorage.getItem("expense_tracker_token");
-      
+
       if (token) {
-        console.log("Found token in localStorage:", token.substring(0, 20) + "...");
+        console.log(
+          "Found token in localStorage:",
+          token.substring(0, 20) + "..."
+        );
         // For now, trust the token exists - let individual API calls handle validation
         setIsAuthenticated(true);
         onAuthSuccess(token);
@@ -47,7 +50,7 @@ export default function AuthWrapper({
     localStorage.removeItem("expense_tracker_user");
     // Clear axios default headers
     if (axios.defaults.headers.common) {
-      delete axios.defaults.headers.common['Authorization'];
+      delete axios.defaults.headers.common["Authorization"];
     }
     setIsAuthenticated(false);
   };

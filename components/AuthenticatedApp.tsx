@@ -21,7 +21,10 @@ export default function AuthenticatedApp() {
     if (authToken) {
       // Set default authorization header for all axios requests
       axios.defaults.headers.common["Authorization"] = `Bearer ${authToken}`;
-      console.log("Set authorization header:", `Bearer ${authToken.substring(0, 20)}...`);
+      console.log(
+        "Set authorization header:",
+        `Bearer ${authToken.substring(0, 20)}...`
+      );
     } else {
       // Remove authorization header
       delete axios.defaults.headers.common["Authorization"];

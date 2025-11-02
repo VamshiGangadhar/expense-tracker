@@ -37,10 +37,13 @@ export default function ExpenseTracker() {
   useEffect(() => {
     const fetchExpenses = () => {
       console.log("Fetching expenses...");
-      console.log("Authorization header:", axios.defaults.headers.common['Authorization']);
+      console.log(
+        "Authorization header:",
+        axios.defaults.headers.common["Authorization"]
+      );
       setLoading(true);
       setError(null);
-      
+
       // Ensure we have a token before making the request
       const token = localStorage.getItem("expense_tracker_token");
       if (!token) {
@@ -50,11 +53,11 @@ export default function ExpenseTracker() {
       }
 
       // Make sure the authorization header is set
-      if (!axios.defaults.headers.common['Authorization']) {
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      if (!axios.defaults.headers.common["Authorization"]) {
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         console.log("Set missing authorization header");
       }
-      
+
       axios
         .get(`${API_CONFIG.BASE_URL}/api/expenses/get_expenses`)
         .then((response) => {
@@ -72,7 +75,9 @@ export default function ExpenseTracker() {
             localStorage.removeItem("expense_tracker_user");
             window.location.reload();
           } else {
-            setError("Failed to load expenses. Please try refreshing the page.");
+            setError(
+              "Failed to load expenses. Please try refreshing the page."
+            );
           }
         });
     };
@@ -93,6 +98,18 @@ export default function ExpenseTracker() {
   const [selectedYear, setSelectedYear] = useState(
     new Date().getFullYear().toString()
   );
+
+  // Function to scroll to add expense form
+  const scrollToAddExpense = () => {
+    const addExpenseElement = document.getElementById("add-expense-form");
+    if (addExpenseElement) {
+      addExpenseElement.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+        inline: "nearest",
+      });
+    }
+  };
 
   const markAsRepaid = async (expenseId: string) => {
     console.log("Attempting to mark expense as repaid:", expenseId);
@@ -219,7 +236,9 @@ export default function ExpenseTracker() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">Loading Expenses...</h2>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">
+            Loading Expenses...
+          </h2>
           <p className="text-gray-500">Please wait while we fetch your data</p>
         </div>
       </div>
@@ -232,13 +251,25 @@ export default function ExpenseTracker() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-500 mb-4">
-            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-16 h-16 mx-auto"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </div>
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">Oops! Something went wrong</h2>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">
+            Oops! Something went wrong
+          </h2>
           <p className="text-gray-500 mb-4">{error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
           >
@@ -252,6 +283,17 @@ export default function ExpenseTracker() {
   return (
     <div className="min-h-screen bg-gray-100 py-4">
       <div className="container mx-auto px-4">
+        {/* Quick Add Expense Button */}
+        <div className="mb-4">
+          <Button
+            onClick={scrollToAddExpense}
+            className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors duration-200"
+          >
+            <Plus className="mr-2 h-5 w-5" />
+            Add New Expense
+          </Button>
+        </div>
+
         {selectedMonth !== "all" && (
           <div className="text-center mb-4">
             <p className="text-base text-gray-600">
@@ -477,7 +519,7 @@ export default function ExpenseTracker() {
         </Card>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <Card>
+          <Card id="add-expense-form">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg">Add New Expense</CardTitle>
             </CardHeader>
@@ -569,9 +611,9 @@ export default function ExpenseTracker() {
                     </div>
                   </div>
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full" 
+                <Button
+                  type="submit"
+                  className="w-full"
                   disabled={actionLoading === "add_expense"}
                 >
                   {actionLoading === "add_expense" ? (
