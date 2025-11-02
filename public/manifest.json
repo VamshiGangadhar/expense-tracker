@@ -1,0 +1,26 @@
+{
+  "name": "💰 Expense Tracker",
+  "short_name": "ExpenseTracker",
+  "description": "Track your monthly expenses with smart categorization and repayment tracking",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3f4f6",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "32x32 64x64",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["finance", "productivity", "utilities"],
+  "lang": "en",
+  "dir": "ltr"
+}

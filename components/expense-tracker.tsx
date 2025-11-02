@@ -84,9 +84,17 @@ export default function ExpenseTracker() {
       if (axios.isAxiosError(error)) {
         console.error("Response data:", error.response?.data);
         console.error("Response status:", error.response?.status);
-        alert(`Failed to mark expense as repaid: ${error.response?.data?.error || error.message}`);
+        alert(
+          `Failed to mark expense as repaid: ${
+            error.response?.data?.error || error.message
+          }`
+        );
       } else {
-        alert(`Failed to mark expense as repaid: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        alert(
+          `Failed to mark expense as repaid: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
       }
     }
   };
@@ -160,7 +168,7 @@ export default function ExpenseTracker() {
     <div className="min-h-screen bg-gray-100 py-8">
       <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold mb-8 text-center">
-          Monthly Expense Tracker (INR)
+          💰 Expense Tracker
         </h1>
 
         {selectedMonth !== "all" && (
