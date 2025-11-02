@@ -31,16 +31,21 @@ type Expense = {
 
 export default function ExpenseTracker() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchExpenses = () => {
       console.log("Fetching expenses...");
       console.log("Authorization header:", axios.defaults.headers.common['Authorization']);
+      setLoading(true);
+      setError(null);
       
       // Ensure we have a token before making the request
       const token = localStorage.getItem("expense_tracker_token");
       if (!token) {
         console.log("No token found, not fetching expenses");
+        setLoading(false);
         return;
       }
 
@@ -56,14 +61,18 @@ export default function ExpenseTracker() {
           console.log("Successfully fetched expenses:", response.data.length);
           const expensesData = response.data;
           setExpenses(expensesData);
+          setLoading(false);
         })
         .catch((error) => {
           console.error("Failed to fetch expenses:", error);
+          setLoading(false);
           if (error.response?.status === 401) {
             console.log("Unauthorized - clearing localStorage and reloading");
             localStorage.removeItem("expense_tracker_token");
             localStorage.removeItem("expense_tracker_user");
             window.location.reload();
+          } else {
+            setError("Failed to load expenses. Please try refreshing the page.");
           }
         });
     };
@@ -77,6 +86,7 @@ export default function ExpenseTracker() {
   const [category, setCategory] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("self");
   const [filter, setFilter] = useState("all");
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [selectedMonth, setSelectedMonth] = useState(
     new Date().getMonth().toString()
   );
@@ -86,6 +96,7 @@ export default function ExpenseTracker() {
 
   const markAsRepaid = async (expenseId: string) => {
     console.log("Attempting to mark expense as repaid:", expenseId);
+    setActionLoading(expenseId);
     try {
       const response = await axios.post(
         `${API_CONFIG.BASE_URL}/api/repayments/repay/${expenseId}`,
@@ -125,10 +136,13 @@ export default function ExpenseTracker() {
           }`
         );
       }
+    } finally {
+      setActionLoading(null);
     }
   };
 
   const markAsNotRepaid = async (expenseId: string) => {
+    setActionLoading(expenseId);
     try {
       await axios.delete(
         `${API_CONFIG.BASE_URL}/api/repayments/repay/${expenseId}`
@@ -147,11 +161,14 @@ export default function ExpenseTracker() {
     } catch (error) {
       console.error("Failed to mark as not repaid:", error);
       alert("Failed to update repayment status. Please try again.");
+    } finally {
+      setActionLoading(null);
     }
   };
 
   const addExpense = async (e: React.FormEvent) => {
     e.preventDefault();
+    setActionLoading("add_expense");
     const newExpense = {
       description,
       amount: parseFloat(amount),
@@ -172,6 +189,9 @@ export default function ExpenseTracker() {
       setPaymentMethod("self");
     } catch (error) {
       console.error("Failed to add expense:", error);
+      alert("Failed to add expense. Please try again.");
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -193,16 +213,48 @@ export default function ExpenseTracker() {
     }
   });
 
-  return (
-    <div className="min-h-screen bg-gray-100 py-8">
-      <div className="container mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-8 text-center">
-          💰 Expense Tracker
-        </h1>
+  // Loading screen while fetching data
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">Loading Expenses...</h2>
+          <p className="text-gray-500">Please wait while we fetch your data</p>
+        </div>
+      </div>
+    );
+  }
 
+  // Error screen if there's an error
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 mb-4">
+            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">Oops! Something went wrong</h2>
+          <p className="text-gray-500 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100 py-4">
+      <div className="container mx-auto px-4">
         {selectedMonth !== "all" && (
-          <div className="text-center mb-6">
-            <p className="text-lg text-gray-600">
+          <div className="text-center mb-4">
+            <p className="text-base text-gray-600">
               Viewing expenses for{" "}
               {
                 [
@@ -226,9 +278,9 @@ export default function ExpenseTracker() {
         )}
 
         {/* Monthly Comparison Card */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Monthly Comparison</CardTitle>
+        <Card className="mb-4">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Monthly Comparison</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-3">
@@ -337,9 +389,9 @@ export default function ExpenseTracker() {
         </Card>
 
         {/* Repayment Tracking Card */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Repayment Status</CardTitle>
+        <Card className="mb-4">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Repayment Status</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
@@ -424,10 +476,10 @@ export default function ExpenseTracker() {
           </CardContent>
         </Card>
 
-        <div className="grid gap-8 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <Card>
-            <CardHeader>
-              <CardTitle>Add New Expense</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Add New Expense</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={addExpense} className="space-y-4">
@@ -517,16 +569,29 @@ export default function ExpenseTracker() {
                     </div>
                   </div>
                 </div>
-                <Button type="submit" className="w-full">
-                  <Plus className="mr-2 h-4 w-4" /> Add Expense
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={actionLoading === "add_expense"}
+                >
+                  {actionLoading === "add_expense" ? (
+                    <div className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Adding Expense...
+                    </div>
+                  ) : (
+                    <>
+                      <Plus className="mr-2 h-4 w-4" /> Add Expense
+                    </>
+                  )}
                 </Button>
               </form>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle>Expense Summary</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Expense Summary</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold mb-4">
@@ -639,9 +704,9 @@ export default function ExpenseTracker() {
           </Card>
         </div>
 
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Expense List</CardTitle>
+        <Card className="mt-4">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Expense List</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 mb-6 md:grid-cols-3">
@@ -782,18 +847,34 @@ export default function ExpenseTracker() {
                               size="sm"
                               variant="outline"
                               onClick={() => markAsRepaid(expense._id)}
-                              className="text-xs px-2 py-1 h-6 bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
+                              disabled={actionLoading === expense._id}
+                              className="text-xs px-2 py-1 h-6 bg-green-50 hover:bg-green-100 text-green-700 border-green-300 disabled:opacity-50"
                             >
-                              Mark Repaid
+                              {actionLoading === expense._id ? (
+                                <div className="flex items-center">
+                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-green-600 mr-1"></div>
+                                  Loading...
+                                </div>
+                              ) : (
+                                "Mark Repaid"
+                              )}
                             </Button>
                           ) : (
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => markAsNotRepaid(expense._id)}
-                              className="text-xs px-2 py-1 h-6 bg-red-50 hover:bg-red-100 text-red-700 border-red-300"
+                              disabled={actionLoading === expense._id}
+                              className="text-xs px-2 py-1 h-6 bg-red-50 hover:bg-red-100 text-red-700 border-red-300 disabled:opacity-50"
                             >
-                              Undo
+                              {actionLoading === expense._id ? (
+                                <div className="flex items-center">
+                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-600 mr-1"></div>
+                                  Loading...
+                                </div>
+                              ) : (
+                                "Undo"
+                              )}
                             </Button>
                           )}
                         </div>
