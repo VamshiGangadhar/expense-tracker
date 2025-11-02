@@ -22,6 +22,9 @@ type Expense = {
   amount: number;
   category: string;
   date: string;
+  paymentMethod: string;
+  isRepaid?: boolean;
+  repaidAmount?: number;
 };
 
 export default function ExpenseTracker() {
@@ -42,6 +45,7 @@ export default function ExpenseTracker() {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("self");
   const [filter, setFilter] = useState("all");
   const [selectedMonth, setSelectedMonth] = useState(
     new Date().getMonth().toString()
@@ -50,6 +54,50 @@ export default function ExpenseTracker() {
     new Date().getFullYear().toString()
   );
 
+  const markAsRepaid = async (expenseId: number) => {
+    try {
+      const response = await axios.post(
+        `https://expense-tracker-backend-delta-seven.vercel.app/api/repayments/repay/${expenseId}`,
+        {
+          repaidAmount: null, // Will use full amount
+          repaymentDate: new Date().toISOString()
+        }
+      );
+      
+      // Update the expense in the local state
+      setExpenses(expenses.map(exp => 
+        exp.id === expenseId 
+          ? { ...exp, isRepaid: true, repaidAmount: exp.amount }
+          : exp
+      ));
+      
+      console.log("Marked as repaid:", response.data);
+    } catch (error) {
+      console.error("Failed to mark as repaid:", error);
+      alert("Failed to mark expense as repaid. Please try again.");
+    }
+  };
+
+  const markAsNotRepaid = async (expenseId: number) => {
+    try {
+      await axios.delete(
+        `https://expense-tracker-backend-delta-seven.vercel.app/api/repayments/repay/${expenseId}`
+      );
+      
+      // Update the expense in the local state
+      setExpenses(expenses.map(exp => 
+        exp.id === expenseId 
+          ? { ...exp, isRepaid: false, repaidAmount: 0 }
+          : exp
+      ));
+      
+      console.log("Marked as not repaid");
+    } catch (error) {
+      console.error("Failed to mark as not repaid:", error);
+      alert("Failed to update repayment status. Please try again.");
+    }
+  };
+
   const addExpense = async (e: React.FormEvent) => {
     e.preventDefault();
     const newExpense: Expense = {
@@ -57,6 +105,7 @@ export default function ExpenseTracker() {
       description,
       amount: parseFloat(amount),
       category,
+      paymentMethod,
       date: new Date().toISOString().split("T")[0],
     };
 
@@ -69,6 +118,7 @@ export default function ExpenseTracker() {
       setDescription("");
       setAmount("");
       setCategory("");
+      setPaymentMethod("self");
     } catch (error) {
       console.error("Failed to add expense:", error);
     }
@@ -235,6 +285,81 @@ export default function ExpenseTracker() {
           </CardContent>
         </Card>
 
+        {/* Repayment Tracking Card */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Repayment Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <h4 className="font-semibold mb-2">Lent Money</h4>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span>Outstanding:</span>
+                    <span className="text-red-600">
+                      ₹{expenses
+                        .filter((e) => e.paymentMethod === "lent" && !e.isRepaid)
+                        .reduce((sum, e) => sum + e.amount, 0)
+                        .toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Repaid:</span>
+                    <span className="text-green-600">
+                      ₹{expenses
+                        .filter((e) => e.paymentMethod === "lent" && e.isRepaid)
+                        .reduce((sum, e) => sum + e.amount, 0)
+                        .toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-500 pt-1 border-t">
+                    <span>Total Lent:</span>
+                    <span>
+                      ₹{expenses
+                        .filter((e) => e.paymentMethod === "lent")
+                        .reduce((sum, e) => sum + e.amount, 0)
+                        .toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">Credit Card Bills</h4>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span>Pending:</span>
+                    <span className="text-red-600">
+                      ₹{expenses
+                        .filter((e) => e.paymentMethod === "credit-card" && !e.isRepaid)
+                        .reduce((sum, e) => sum + e.amount, 0)
+                        .toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Paid:</span>
+                    <span className="text-green-600">
+                      ₹{expenses
+                        .filter((e) => e.paymentMethod === "credit-card" && e.isRepaid)
+                        .reduce((sum, e) => sum + e.amount, 0)
+                        .toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-500 pt-1 border-t">
+                    <span>Total Credit:</span>
+                    <span>
+                      ₹{expenses
+                        .filter((e) => e.paymentMethod === "credit-card")
+                        .reduce((sum, e) => sum + e.amount, 0)
+                        .toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="grid gap-8 md:grid-cols-2">
           <Card>
             <CardHeader>
@@ -280,6 +405,53 @@ export default function ExpenseTracker() {
                       <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+                <div>
+                  <Label>Payment Method</Label>
+                  <div className="flex space-x-4 mt-2">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="self"
+                        name="paymentMethod"
+                        value="self"
+                        checked={paymentMethod === "self"}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                      />
+                      <Label htmlFor="self" className="cursor-pointer">
+                        Self
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="lent"
+                        name="paymentMethod"
+                        value="lent"
+                        checked={paymentMethod === "lent"}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                      />
+                      <Label htmlFor="lent" className="cursor-pointer">
+                        Lent
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="credit-card"
+                        name="paymentMethod"
+                        value="credit-card"
+                        checked={paymentMethod === "credit-card"}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                      />
+                      <Label htmlFor="credit-card" className="cursor-pointer">
+                        Credit Card
+                      </Label>
+                    </div>
+                  </div>
                 </div>
                 <Button type="submit" className="w-full">
                   <Plus className="mr-2 h-4 w-4" /> Add Expense
@@ -356,6 +528,44 @@ export default function ExpenseTracker() {
                     ₹
                     {filteredExpenses
                       .filter((e) => e.category === "other")
+                      .reduce((sum, e) => sum + e.amount, 0)
+                      .toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Payment Method Breakdown */}
+              <hr className="my-4" />
+              <h4 className="font-semibold mb-3 text-gray-700">
+                By Payment Method
+              </h4>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span>Self</span>
+                  <span>
+                    ₹
+                    {filteredExpenses
+                      .filter((e) => (e.paymentMethod || "self") === "self")
+                      .reduce((sum, e) => sum + e.amount, 0)
+                      .toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Lent</span>
+                  <span>
+                    ₹
+                    {filteredExpenses
+                      .filter((e) => e.paymentMethod === "lent")
+                      .reduce((sum, e) => sum + e.amount, 0)
+                      .toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Credit Card</span>
+                  <span>
+                    ₹
+                    {filteredExpenses
+                      .filter((e) => e.paymentMethod === "credit-card")
                       .reduce((sum, e) => sum + e.amount, 0)
                       .toFixed(2)}
                   </span>
@@ -476,13 +686,48 @@ export default function ExpenseTracker() {
                         <p className="text-sm text-gray-500">
                           {expense.category}
                         </p>
+                        <p className="text-xs text-blue-600 capitalize">
+                          {expense.paymentMethod?.replace("-", " ") || "self"}
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold">
-                        ₹{expense.amount.toFixed(2)}
-                      </p>
-                      <p className="text-sm text-gray-500">{expense.date}</p>
+                    <div className="flex flex-col items-end space-y-2">
+                      <div className="text-right">
+                        <p className="font-semibold">
+                          ₹{expense.amount.toFixed(2)}
+                        </p>
+                        <p className="text-sm text-gray-500">{expense.date}</p>
+                        {(expense.paymentMethod === "lent" || expense.paymentMethod === "credit-card") && (
+                          <p className={`text-xs font-medium ${
+                            expense.isRepaid ? "text-green-600" : "text-red-600"
+                          }`}>
+                            {expense.isRepaid ? "Repaid" : "Not Repaid"}
+                          </p>
+                        )}
+                      </div>
+                      {(expense.paymentMethod === "lent" || expense.paymentMethod === "credit-card") && (
+                        <div className="flex space-x-1">
+                          {!expense.isRepaid ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => markAsRepaid(expense.id)}
+                              className="text-xs px-2 py-1 h-6 bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
+                            >
+                              Mark Repaid
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => markAsNotRepaid(expense.id)}
+                              className="text-xs px-2 py-1 h-6 bg-red-50 hover:bg-red-100 text-red-700 border-red-300"
+                            >
+                              Undo
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))

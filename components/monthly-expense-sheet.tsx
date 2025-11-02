@@ -27,6 +27,9 @@ type Expense = {
   amount: number;
   category: string;
   date: string;
+  paymentMethod: string;
+  isRepaid?: boolean;
+  repaidAmount?: number;
 };
 
 export default function MonthlyExpenseSheet() {
@@ -128,6 +131,70 @@ export default function MonthlyExpenseSheet() {
           </CardContent>
         </Card>
 
+        {/* Payment Method Summary */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Payment Method Breakdown</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="text-center">
+                <p className="text-sm text-gray-500">Self</p>
+                <p className="text-xl font-bold">
+                  ₹
+                  {filteredExpenses
+                    .filter((e) => (e.paymentMethod || "self") === "self")
+                    .reduce((sum, e) => sum + e.amount, 0)
+                    .toFixed(2)}
+                </p>
+                <p className="text-xs text-gray-400">
+                  {
+                    filteredExpenses.filter(
+                      (e) => (e.paymentMethod || "self") === "self"
+                    ).length
+                  }{" "}
+                  expenses
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-500">Lent</p>
+                <p className="text-xl font-bold">
+                  ₹
+                  {filteredExpenses
+                    .filter((e) => e.paymentMethod === "lent")
+                    .reduce((sum, e) => sum + e.amount, 0)
+                    .toFixed(2)}
+                </p>
+                <p className="text-xs text-gray-400">
+                  {
+                    filteredExpenses.filter((e) => e.paymentMethod === "lent")
+                      .length
+                  }{" "}
+                  expenses
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-500">Credit Card</p>
+                <p className="text-xl font-bold">
+                  ₹
+                  {filteredExpenses
+                    .filter((e) => e.paymentMethod === "credit-card")
+                    .reduce((sum, e) => sum + e.amount, 0)
+                    .toFixed(2)}
+                </p>
+                <p className="text-xs text-gray-400">
+                  {
+                    filteredExpenses.filter(
+                      (e) => e.paymentMethod === "credit-card"
+                    ).length
+                  }{" "}
+                  expenses
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>
@@ -145,6 +212,7 @@ export default function MonthlyExpenseSheet() {
                     <TableHead>Date</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead>Category</TableHead>
+                    <TableHead>Payment Method</TableHead>
                     <TableHead className="text-right">Amount (INR)</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -152,7 +220,7 @@ export default function MonthlyExpenseSheet() {
                   {filteredExpenses.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={4}
+                        colSpan={5}
                         className="text-center py-8 text-gray-500"
                       >
                         No expenses found for {months[parseInt(selectedMonth)]}{" "}
@@ -168,13 +236,16 @@ export default function MonthlyExpenseSheet() {
                           <TableCell className="capitalize">
                             {expense.category}
                           </TableCell>
+                          <TableCell className="capitalize">
+                            {expense.paymentMethod?.replace("-", " ") || "self"}
+                          </TableCell>
                           <TableCell className="text-right">
                             ₹{expense.amount.toFixed(2)}
                           </TableCell>
                         </TableRow>
                       ))}
                       <TableRow>
-                        <TableCell colSpan={3} className="font-bold">
+                        <TableCell colSpan={4} className="font-bold">
                           Total
                         </TableCell>
                         <TableCell className="text-right font-bold">
