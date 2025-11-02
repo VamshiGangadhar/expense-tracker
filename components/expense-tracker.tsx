@@ -17,7 +17,8 @@ import Link from "next/link";
 import axios from "axios";
 
 type Expense = {
-  id: number;
+  _id: string;
+  id?: number;
   description: string;
   amount: number;
   category: string;
@@ -54,43 +55,57 @@ export default function ExpenseTracker() {
     new Date().getFullYear().toString()
   );
 
-  const markAsRepaid = async (expenseId: number) => {
+  const markAsRepaid = async (expenseId: string) => {
+    console.log("Attempting to mark expense as repaid:", expenseId);
     try {
       const response = await axios.post(
         `https://expense-tracker-backend-delta-seven.vercel.app/api/repayments/repay/${expenseId}`,
         {
           repaidAmount: null, // Will use full amount
-          repaymentDate: new Date().toISOString()
+          repaymentDate: new Date().toISOString(),
         }
       );
-      
+
+      console.log("Backend response:", response.data);
+
       // Update the expense in the local state
-      setExpenses(expenses.map(exp => 
-        exp.id === expenseId 
-          ? { ...exp, isRepaid: true, repaidAmount: exp.amount }
-          : exp
-      ));
-      
-      console.log("Marked as repaid:", response.data);
+      setExpenses(
+        expenses.map((exp) =>
+          exp._id === expenseId
+            ? { ...exp, isRepaid: true, repaidAmount: exp.amount }
+            : exp
+        )
+      );
+
+      console.log("Successfully marked as repaid:", response.data);
+      alert("Expense marked as repaid successfully!");
     } catch (error) {
       console.error("Failed to mark as repaid:", error);
-      alert("Failed to mark expense as repaid. Please try again.");
+      if (axios.isAxiosError(error)) {
+        console.error("Response data:", error.response?.data);
+        console.error("Response status:", error.response?.status);
+        alert(`Failed to mark expense as repaid: ${error.response?.data?.error || error.message}`);
+      } else {
+        alert(`Failed to mark expense as repaid: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
     }
   };
 
-  const markAsNotRepaid = async (expenseId: number) => {
+  const markAsNotRepaid = async (expenseId: string) => {
     try {
       await axios.delete(
         `https://expense-tracker-backend-delta-seven.vercel.app/api/repayments/repay/${expenseId}`
       );
-      
+
       // Update the expense in the local state
-      setExpenses(expenses.map(exp => 
-        exp.id === expenseId 
-          ? { ...exp, isRepaid: false, repaidAmount: 0 }
-          : exp
-      ));
-      
+      setExpenses(
+        expenses.map((exp) =>
+          exp._id === expenseId
+            ? { ...exp, isRepaid: false, repaidAmount: 0 }
+            : exp
+        )
+      );
+
       console.log("Marked as not repaid");
     } catch (error) {
       console.error("Failed to mark as not repaid:", error);
@@ -100,8 +115,7 @@ export default function ExpenseTracker() {
 
   const addExpense = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newExpense: Expense = {
-      id: Date.now(), // This will be ignored by the server if it's not used there
+    const newExpense = {
       description,
       amount: parseFloat(amount),
       category,
@@ -298,8 +312,11 @@ export default function ExpenseTracker() {
                   <div className="flex justify-between text-sm">
                     <span>Outstanding:</span>
                     <span className="text-red-600">
-                      ₹{expenses
-                        .filter((e) => e.paymentMethod === "lent" && !e.isRepaid)
+                      ₹
+                      {expenses
+                        .filter(
+                          (e) => e.paymentMethod === "lent" && !e.isRepaid
+                        )
                         .reduce((sum, e) => sum + e.amount, 0)
                         .toFixed(2)}
                     </span>
@@ -307,7 +324,8 @@ export default function ExpenseTracker() {
                   <div className="flex justify-between text-sm">
                     <span>Repaid:</span>
                     <span className="text-green-600">
-                      ₹{expenses
+                      ₹
+                      {expenses
                         .filter((e) => e.paymentMethod === "lent" && e.isRepaid)
                         .reduce((sum, e) => sum + e.amount, 0)
                         .toFixed(2)}
@@ -316,7 +334,8 @@ export default function ExpenseTracker() {
                   <div className="flex justify-between text-xs text-gray-500 pt-1 border-t">
                     <span>Total Lent:</span>
                     <span>
-                      ₹{expenses
+                      ₹
+                      {expenses
                         .filter((e) => e.paymentMethod === "lent")
                         .reduce((sum, e) => sum + e.amount, 0)
                         .toFixed(2)}
@@ -330,8 +349,12 @@ export default function ExpenseTracker() {
                   <div className="flex justify-between text-sm">
                     <span>Pending:</span>
                     <span className="text-red-600">
-                      ₹{expenses
-                        .filter((e) => e.paymentMethod === "credit-card" && !e.isRepaid)
+                      ₹
+                      {expenses
+                        .filter(
+                          (e) =>
+                            e.paymentMethod === "credit-card" && !e.isRepaid
+                        )
                         .reduce((sum, e) => sum + e.amount, 0)
                         .toFixed(2)}
                     </span>
@@ -339,8 +362,11 @@ export default function ExpenseTracker() {
                   <div className="flex justify-between text-sm">
                     <span>Paid:</span>
                     <span className="text-green-600">
-                      ₹{expenses
-                        .filter((e) => e.paymentMethod === "credit-card" && e.isRepaid)
+                      ₹
+                      {expenses
+                        .filter(
+                          (e) => e.paymentMethod === "credit-card" && e.isRepaid
+                        )
                         .reduce((sum, e) => sum + e.amount, 0)
                         .toFixed(2)}
                     </span>
@@ -348,7 +374,8 @@ export default function ExpenseTracker() {
                   <div className="flex justify-between text-xs text-gray-500 pt-1 border-t">
                     <span>Total Credit:</span>
                     <span>
-                      ₹{expenses
+                      ₹
+                      {expenses
                         .filter((e) => e.paymentMethod === "credit-card")
                         .reduce((sum, e) => sum + e.amount, 0)
                         .toFixed(2)}
@@ -657,7 +684,7 @@ export default function ExpenseTracker() {
               ) : (
                 filteredExpenses.map((expense) => (
                   <div
-                    key={expense.id}
+                    key={expense._id}
                     className="flex items-center justify-between p-4 bg-white rounded-lg shadow"
                   >
                     <div className="flex items-center space-x-4">
@@ -697,21 +724,27 @@ export default function ExpenseTracker() {
                           ₹{expense.amount.toFixed(2)}
                         </p>
                         <p className="text-sm text-gray-500">{expense.date}</p>
-                        {(expense.paymentMethod === "lent" || expense.paymentMethod === "credit-card") && (
-                          <p className={`text-xs font-medium ${
-                            expense.isRepaid ? "text-green-600" : "text-red-600"
-                          }`}>
+                        {(expense.paymentMethod === "lent" ||
+                          expense.paymentMethod === "credit-card") && (
+                          <p
+                            className={`text-xs font-medium ${
+                              expense.isRepaid
+                                ? "text-green-600"
+                                : "text-red-600"
+                            }`}
+                          >
                             {expense.isRepaid ? "Repaid" : "Not Repaid"}
                           </p>
                         )}
                       </div>
-                      {(expense.paymentMethod === "lent" || expense.paymentMethod === "credit-card") && (
+                      {(expense.paymentMethod === "lent" ||
+                        expense.paymentMethod === "credit-card") && (
                         <div className="flex space-x-1">
                           {!expense.isRepaid ? (
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => markAsRepaid(expense.id)}
+                              onClick={() => markAsRepaid(expense._id)}
                               className="text-xs px-2 py-1 h-6 bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
                             >
                               Mark Repaid
@@ -720,7 +753,7 @@ export default function ExpenseTracker() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => markAsNotRepaid(expense.id)}
+                              onClick={() => markAsNotRepaid(expense._id)}
                               className="text-xs px-2 py-1 h-6 bg-red-50 hover:bg-red-100 text-red-700 border-red-300"
                             >
                               Undo

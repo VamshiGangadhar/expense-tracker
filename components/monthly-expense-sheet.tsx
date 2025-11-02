@@ -22,7 +22,8 @@ import Link from "next/link";
 import axios from "axios";
 
 type Expense = {
-  id: number;
+  _id: string;
+  id?: number;
   description: string;
   amount: number;
   category: string;
@@ -230,7 +231,7 @@ export default function MonthlyExpenseSheet() {
                   ) : (
                     <>
                       {filteredExpenses.map((expense) => (
-                        <TableRow key={expense.id}>
+                        <TableRow key={expense._id}>
                           <TableCell>{expense.date}</TableCell>
                           <TableCell>{expense.description}</TableCell>
                           <TableCell className="capitalize">
