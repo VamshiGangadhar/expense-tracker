@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+import API_CONFIG from "@/lib/api-config";
 import Login from "./Login";
 import Signup from "./Signup";
 
@@ -18,13 +20,34 @@ export default function AuthWrapper({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already authenticated
-    const token = localStorage.getItem("expense_tracker_token");
-    if (token) {
-      setIsAuthenticated(true);
-      onAuthSuccess(token);
-    }
-    setLoading(false);
+    const checkAuthStatus = async () => {
+      const token = localStorage.getItem("expense_tracker_token");
+      
+      if (token) {
+        // Verify token by making a test API call
+        try {
+          // Set the token in axios headers temporarily for verification
+          const tempHeaders = { Authorization: `Bearer ${token}` };
+          await fetch(`${API_CONFIG.BASE_URL}/api/expenses/get_expenses`, {
+            headers: tempHeaders
+          });
+          
+          setIsAuthenticated(true);
+          onAuthSuccess(token);
+        } catch {
+          // Token is invalid, remove it
+          console.log("Invalid token, removing from localStorage");
+          localStorage.removeItem("expense_tracker_token");
+          localStorage.removeItem("expense_tracker_user");
+          setIsAuthenticated(false);
+        }
+      } else {
+        setIsAuthenticated(false);
+      }
+      setLoading(false);
+    };
+
+    checkAuthStatus();
   }, [onAuthSuccess]);
 
   const handleAuthSuccess = (token: string) => {
@@ -34,6 +57,11 @@ export default function AuthWrapper({
 
   const handleLogout = () => {
     localStorage.removeItem("expense_tracker_token");
+    localStorage.removeItem("expense_tracker_user");
+    // Clear axios default headers
+    if (axios.defaults.headers.common) {
+      delete axios.defaults.headers.common['Authorization'];
+    }
     setIsAuthenticated(false);
   };
 

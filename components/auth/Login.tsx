@@ -42,8 +42,8 @@ export default function Login({
       );
 
       const { token, user } = response.data;
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("expense_tracker_token", token);
+      localStorage.setItem("expense_tracker_user", JSON.stringify(user));
       onLoginSuccess(token, user);
     } catch (error) {
       console.error("Login failed:", error);
