@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import API_CONFIG from "@/lib/api-config";
 import Login from "./Login";
 import Signup from "./Signup";
 
@@ -24,24 +23,12 @@ export default function AuthWrapper({
       const token = localStorage.getItem("expense_tracker_token");
       
       if (token) {
-        // Verify token by making a test API call
-        try {
-          // Set the token in axios headers temporarily for verification
-          const tempHeaders = { Authorization: `Bearer ${token}` };
-          await fetch(`${API_CONFIG.BASE_URL}/api/expenses/get_expenses`, {
-            headers: tempHeaders
-          });
-          
-          setIsAuthenticated(true);
-          onAuthSuccess(token);
-        } catch {
-          // Token is invalid, remove it
-          console.log("Invalid token, removing from localStorage");
-          localStorage.removeItem("expense_tracker_token");
-          localStorage.removeItem("expense_tracker_user");
-          setIsAuthenticated(false);
-        }
+        console.log("Found token in localStorage:", token.substring(0, 20) + "...");
+        // For now, trust the token exists - let individual API calls handle validation
+        setIsAuthenticated(true);
+        onAuthSuccess(token);
       } else {
+        console.log("No token found in localStorage");
         setIsAuthenticated(false);
       }
       setLoading(false);

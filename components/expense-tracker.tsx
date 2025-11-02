@@ -33,13 +33,43 @@ export default function ExpenseTracker() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
 
   useEffect(() => {
-    axios
-      .get(`${API_CONFIG.BASE_URL}/api/expenses/get_expenses`)
-      .then((response) => {
-        const expensesData = response.data;
-        setExpenses(expensesData);
-      })
-      .catch((error) => console.error("Failed to fetch expenses:", error));
+    const fetchExpenses = () => {
+      console.log("Fetching expenses...");
+      console.log("Authorization header:", axios.defaults.headers.common['Authorization']);
+      
+      // Ensure we have a token before making the request
+      const token = localStorage.getItem("expense_tracker_token");
+      if (!token) {
+        console.log("No token found, not fetching expenses");
+        return;
+      }
+
+      // Make sure the authorization header is set
+      if (!axios.defaults.headers.common['Authorization']) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        console.log("Set missing authorization header");
+      }
+      
+      axios
+        .get(`${API_CONFIG.BASE_URL}/api/expenses/get_expenses`)
+        .then((response) => {
+          console.log("Successfully fetched expenses:", response.data.length);
+          const expensesData = response.data;
+          setExpenses(expensesData);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch expenses:", error);
+          if (error.response?.status === 401) {
+            console.log("Unauthorized - clearing localStorage and reloading");
+            localStorage.removeItem("expense_tracker_token");
+            localStorage.removeItem("expense_tracker_user");
+            window.location.reload();
+          }
+        });
+    };
+
+    // Add a small delay to ensure authentication setup is complete
+    setTimeout(fetchExpenses, 100);
   }, []);
 
   const [description, setDescription] = useState("");
