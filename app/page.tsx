@@ -1,5 +1,5 @@
-import ExpenseTracker from "@/components/expense-tracker";
+import AuthenticatedApp from "@/components/AuthenticatedApp";
 
 export default function Home() {
-  return <ExpenseTracker />;
+  return <AuthenticatedApp />;
 }

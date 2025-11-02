@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import Link from "next/link";
 import axios from "axios";
+import API_CONFIG from "@/lib/api-config";
 
 type Expense = {
   _id: string;
@@ -33,9 +34,7 @@ export default function ExpenseTracker() {
 
   useEffect(() => {
     axios
-      .get(
-        "https://expense-tracker-backend-delta-seven.vercel.app/api/expenses/get_expenses"
-      )
+      .get(`${API_CONFIG.BASE_URL}/api/expenses/get_expenses`)
       .then((response) => {
         const expensesData = response.data;
         setExpenses(expensesData);
@@ -59,7 +58,7 @@ export default function ExpenseTracker() {
     console.log("Attempting to mark expense as repaid:", expenseId);
     try {
       const response = await axios.post(
-        `https://expense-tracker-backend-delta-seven.vercel.app/api/repayments/repay/${expenseId}`,
+        `${API_CONFIG.BASE_URL}/api/repayments/repay/${expenseId}`,
         {
           repaidAmount: null, // Will use full amount
           repaymentDate: new Date().toISOString(),
@@ -102,7 +101,7 @@ export default function ExpenseTracker() {
   const markAsNotRepaid = async (expenseId: string) => {
     try {
       await axios.delete(
-        `https://expense-tracker-backend-delta-seven.vercel.app/api/repayments/repay/${expenseId}`
+        `${API_CONFIG.BASE_URL}/api/repayments/repay/${expenseId}`
       );
 
       // Update the expense in the local state
@@ -133,7 +132,7 @@ export default function ExpenseTracker() {
 
     try {
       const response = await axios.post(
-        "https://expense-tracker-backend-delta-seven.vercel.app/api/expenses/add_expense",
+        `${API_CONFIG.BASE_URL}/api/expenses/add_expense`,
         newExpense
       );
       setExpenses([...expenses, response.data]); // Assuming the API returns the added expense

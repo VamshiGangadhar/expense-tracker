@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import axios from "axios";
+import API_CONFIG from "@/lib/api-config";
 
 type Expense = {
   _id: string;
@@ -39,9 +40,7 @@ export default function MonthlyExpenseSheet() {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(
-        "https://expense-tracker-backend-delta-seven.vercel.app/api/expenses/get_expenses"
-      )
+      .get(`${API_CONFIG.BASE_URL}/api/expenses/get_expenses`)
       .then((response) => {
         const expensesData = response.data;
         setExpenses(expensesData);

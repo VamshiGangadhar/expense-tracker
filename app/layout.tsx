@@ -15,32 +15,40 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "💰 Expense Tracker - Manage Your Money",
-  description: "Track your monthly expenses, manage lent money, and monitor credit card bills with smart categorization and repayment tracking.",
-  keywords: ["expense tracker", "money management", "budget", "finance", "expenses", "repayment tracking"],
+  description:
+    "Track your monthly expenses, manage lent money, and monitor credit card bills with smart categorization and repayment tracking.",
+  keywords: [
+    "expense tracker",
+    "money management",
+    "budget",
+    "finance",
+    "expenses",
+    "repayment tracking",
+  ],
   authors: [{ name: "VamshiGangadhar" }],
   viewport: "width=device-width, initial-scale=1",
   themeColor: "#10b981",
   icons: {
     icon: [
       {
-        url: '/favicon.svg',
-        type: 'image/svg+xml',
+        url: "/favicon.svg",
+        type: "image/svg+xml",
       },
       {
-        url: '/favicon.ico',
-        sizes: 'any',
+        url: "/favicon.ico",
+        sizes: "any",
       },
     ],
     apple: [
       {
-        url: '/app-icon.svg',
-        sizes: '180x180',
-        type: 'image/svg+xml',
+        url: "/app-icon.svg",
+        sizes: "180x180",
+        type: "image/svg+xml",
       },
     ],
-    shortcut: ['/favicon.svg'],
+    shortcut: ["/favicon.svg"],
   },
-  manifest: '/manifest.json',
+  manifest: "/manifest.json",
   openGraph: {
     title: "💰 Expense Tracker",
     description: "Smart expense tracking with repayment management",
