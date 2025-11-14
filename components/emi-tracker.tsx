@@ -19,7 +19,7 @@ import Link from "next/link";
 
 const API_BASE_URL =
   process.env.NODE_ENV === "production"
-    ? "https://expense-tracker-backend-umber.vercel.app"
+    ? "https://expense-tracker-backend-delta-seven.vercel.app"
     : "http://localhost:3004";
 
 interface EMIInstallment {
