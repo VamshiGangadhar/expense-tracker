@@ -82,7 +82,7 @@ export function EMITracker() {
 
   const fetchEMIs = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("expense_tracker_token");
       const response = await axios.get(`${API_BASE_URL}/api/emis`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -94,7 +94,7 @@ export function EMITracker() {
 
   const fetchSummary = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("expense_tracker_token");
       const response = await axios.get(`${API_BASE_URL}/api/emis/summary`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -110,7 +110,7 @@ export function EMITracker() {
     e.preventDefault();
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("expense_tracker_token");
       await axios.post(
         `${API_BASE_URL}/api/emis`,
         {
@@ -151,7 +151,7 @@ export function EMITracker() {
     amount: number
   ) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("expense_tracker_token");
       await axios.put(
         `${API_BASE_URL}/api/emis/${emiId}/installment/${installmentNumber}/pay`,
         {
@@ -175,7 +175,7 @@ export function EMITracker() {
     installmentNumber: number
   ) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("expense_tracker_token");
       await axios.put(
         `${API_BASE_URL}/api/emis/${emiId}/installment/${installmentNumber}/unpay`,
         {},
