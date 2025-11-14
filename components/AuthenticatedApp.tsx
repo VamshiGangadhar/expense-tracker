@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import axios from "axios";
 import AuthWrapper from "@/components/auth/AuthWrapper";
 import ExpenseTracker from "@/components/expense-tracker";
+import { EMITracker } from "@/components/emi-tracker";
 
 export default function AuthenticatedApp() {
   const [authToken, setAuthToken] = useState<string | null>(null);
+  const pathname = usePathname();
 
   // Initialize token from localStorage on component mount
   useEffect(() => {
@@ -37,9 +40,18 @@ export default function AuthenticatedApp() {
     setAuthToken(token);
   };
 
+  const renderContent = () => {
+    switch (pathname) {
+      case "/emi":
+        return <EMITracker />;
+      default:
+        return <ExpenseTracker />;
+    }
+  };
+
   return (
     <AuthWrapper onAuthSuccess={handleAuthSuccess}>
-      <ExpenseTracker />
+      {renderContent()}
     </AuthWrapper>
   );
 }

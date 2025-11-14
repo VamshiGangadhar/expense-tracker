@@ -283,6 +283,33 @@ export default function ExpenseTracker() {
   return (
     <div className="min-h-screen bg-gray-100 py-4">
       <div className="container mx-auto px-4">
+        {/* Navigation Tabs */}
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-2 bg-white p-2 rounded-lg shadow-sm">
+            <Link href="/">
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                📊 Expenses
+              </Button>
+            </Link>
+            <Link href="/emi">
+              <Button
+                variant="outline"
+                className="border-blue-200 hover:bg-blue-50"
+              >
+                💳 EMI Tracker
+              </Button>
+            </Link>
+            <Link href="/monthly-sheet">
+              <Button
+                variant="outline"
+                className="border-blue-200 hover:bg-blue-50"
+              >
+                📅 Monthly Sheet
+              </Button>
+            </Link>
+          </div>
+        </div>
+
         {/* Quick Add Expense Button */}
         <div className="mb-4">
           <Button
