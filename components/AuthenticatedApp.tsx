@@ -6,6 +6,8 @@ import axios from "axios";
 import AuthWrapper from "@/components/auth/AuthWrapper";
 import ExpenseTracker from "@/components/expense-tracker";
 import { EMITracker } from "@/components/emi-tracker";
+import SavingsTracker from "@/components/savings-tracker";
+import LendingTracker from "@/components/lending-tracker";
 
 export default function AuthenticatedApp() {
   const [authToken, setAuthToken] = useState<string | null>(null);
@@ -44,6 +46,10 @@ export default function AuthenticatedApp() {
     switch (pathname) {
       case "/emi":
         return <EMITracker />;
+      case "/savings":
+        return <SavingsTracker />;
+      case "/lending":
+        return <LendingTracker />;
       default:
         return <ExpenseTracker />;
     }

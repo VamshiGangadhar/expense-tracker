@@ -299,6 +299,22 @@ export default function ExpenseTracker() {
                 💳 EMI Tracker
               </Button>
             </Link>
+            <Link href="/savings">
+              <Button
+                variant="outline"
+                className="border-blue-200 hover:bg-blue-50"
+              >
+                💰 Savings
+              </Button>
+            </Link>
+            <Link href="/lending">
+              <Button
+                variant="outline"
+                className="border-blue-200 hover:bg-blue-50"
+              >
+                🤝 Lending
+              </Button>
+            </Link>
             <Link href="/monthly-sheet">
               <Button
                 variant="outline"
