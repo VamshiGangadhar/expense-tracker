@@ -91,6 +91,7 @@ export default function ExpenseTracker() {
   const [category, setCategory] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("self");
   const [filter, setFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [selectedMonth, setSelectedMonth] = useState(
     new Date().getMonth().toString()
@@ -216,17 +217,22 @@ export default function ExpenseTracker() {
     // Filter by category
     const categoryMatch = filter === "all" || expense.category === filter;
 
+    // Filter by search query
+    const searchMatch =
+      searchQuery === "" ||
+      expense.description.toLowerCase().includes(searchQuery.toLowerCase());
+
     // Filter by month and year
     if (selectedMonth === "all") {
       // If "all months" selected, only filter by year
       const expenseYear = new Date(expense.date).getFullYear().toString();
-      return categoryMatch && expenseYear === selectedYear;
+      return categoryMatch && searchMatch && expenseYear === selectedYear;
     } else {
       // Filter by both month and year
       const expenseDate = new Date(expense.date);
       const monthMatch = expenseDate.getMonth().toString() === selectedMonth;
       const yearMatch = expenseDate.getFullYear().toString() === selectedYear;
-      return categoryMatch && monthMatch && yearMatch;
+      return categoryMatch && searchMatch && monthMatch && yearMatch;
     }
   });
 
@@ -791,9 +797,36 @@ export default function ExpenseTracker() {
 
         <Card className="mt-4">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Expense List</CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-lg">Expense List</CardTitle>
+              {searchQuery && (
+                <div className="text-sm font-semibold text-blue-600">
+                  Search Total: ₹
+                  {filteredExpenses
+                    .reduce((sum, expense) => sum + expense.amount, 0)
+                    .toFixed(2)}
+                </div>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
+            <div className="mb-4">
+              <Label htmlFor="search">Search Expenses</Label>
+              <Input
+                id="search"
+                type="text"
+                placeholder="Search by description..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full"
+              />
+              {searchQuery && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Found {filteredExpenses.length} expense(s) matching &quot;
+                  {searchQuery}&quot;
+                </p>
+              )}
+            </div>
             <div className="grid gap-4 mb-6 md:grid-cols-3">
               <div>
                 <Label htmlFor="filter">Filter by Category</Label>
