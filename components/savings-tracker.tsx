@@ -256,17 +256,20 @@ export default function SavingsTracker() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
+          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center">
-                <TrendingUp className="mr-2 h-4 w-4" />
-                Total Deposits
+                <Wallet className="mr-2 h-4 w-4" />
+                Current Balance
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                ₹{summary.totalDeposits.toLocaleString("en-IN")}
+                ₹{summary.balance.toLocaleString("en-IN")}
               </div>
+              <p className="text-xs mt-1 opacity-90">
+                {summary.transactionCount} transactions
+              </p>
             </CardContent>
           </Card>
 
@@ -284,25 +287,22 @@ export default function SavingsTracker() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center">
-                <Wallet className="mr-2 h-4 w-4" />
-                Current Balance
+                <TrendingUp className="mr-2 h-4 w-4" />
+                Total Deposits
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                ₹{summary.balance.toLocaleString("en-IN")}
+                ₹{summary.totalDeposits.toLocaleString("en-IN")}
               </div>
-              <p className="text-xs mt-1 opacity-90">
-                {summary.transactionCount} transactions
-              </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Monthly Savings Breakdown */}
+{/* Monthly Savings Breakdown */}
         {monthlySavings.length > 0 && (
           <Card className="mb-8">
             <CardHeader>
