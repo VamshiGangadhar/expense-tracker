@@ -493,7 +493,7 @@ export default function ExpenseTracker() {
                     <span>Outstanding:</span>
                     <span className="text-red-600">
                       ₹
-                      {expenses
+                      {filteredExpenses
                         .filter(
                           (e) => e.paymentMethod === "lent" && !e.isRepaid
                         )
@@ -505,7 +505,7 @@ export default function ExpenseTracker() {
                     <span>Repaid:</span>
                     <span className="text-green-600">
                       ₹
-                      {expenses
+                      {filteredExpenses
                         .filter((e) => e.paymentMethod === "lent" && e.isRepaid)
                         .reduce((sum, e) => sum + e.amount, 0)
                         .toFixed(2)}
@@ -515,7 +515,7 @@ export default function ExpenseTracker() {
                     <span>Total Lent:</span>
                     <span>
                       ₹
-                      {expenses
+                      {filteredExpenses
                         .filter((e) => e.paymentMethod === "lent")
                         .reduce((sum, e) => sum + e.amount, 0)
                         .toFixed(2)}
@@ -530,7 +530,7 @@ export default function ExpenseTracker() {
                     <span>Pending:</span>
                     <span className="text-red-600">
                       ₹
-                      {expenses
+                      {filteredExpenses
                         .filter(
                           (e) =>
                             e.paymentMethod === "credit-card" && !e.isRepaid
@@ -543,7 +543,7 @@ export default function ExpenseTracker() {
                     <span>Paid:</span>
                     <span className="text-green-600">
                       ₹
-                      {expenses
+                      {filteredExpenses
                         .filter(
                           (e) => e.paymentMethod === "credit-card" && e.isRepaid
                         )
@@ -555,7 +555,7 @@ export default function ExpenseTracker() {
                     <span>Total Credit:</span>
                     <span>
                       ₹
-                      {expenses
+                      {filteredExpenses
                         .filter((e) => e.paymentMethod === "credit-card")
                         .reduce((sum, e) => sum + e.amount, 0)
                         .toFixed(2)}
