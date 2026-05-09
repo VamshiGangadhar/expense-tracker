@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import axios from "axios";
 import API_CONFIG from "@/lib/api-config";
+import GmailList from "@/components/gmail/GmailList";
 
 type Expense = {
   _id: string;
@@ -1004,6 +1005,10 @@ export default function ExpenseTracker() {
             </div>
           </CardContent>
         </Card>
+
+        <div className="mt-8">
+          <GmailList />
+        </div>
 
         <div className="mt-8 text-center">
           <Link href="/monthly-sheet" passHref>
