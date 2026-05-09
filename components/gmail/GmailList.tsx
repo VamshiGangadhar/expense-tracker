@@ -27,8 +27,15 @@ export default function GmailList() {
   const [emails, setEmails] = useState<Email[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isFetching = React.useRef(false);
 
   const loadEmails = async () => {
+    if (isFetching.current) return;
+    
+    const token = typeof window !== "undefined" ? localStorage.getItem("expense_tracker_token") : null;
+    if (!token) return;
+
+    isFetching.current = true;
     setLoading(true);
     setError(null);
     try {
@@ -47,6 +54,9 @@ export default function GmailList() {
       const data = await fetchEmails(startDateStr, endDateStr);
       setEmails(data.emails || []);
     } catch (err: unknown) {
+      // If we are unmounting or another fetch started, ignore this error
+      if (!isFetching.current) return;
+      
       let errorMessage = "Failed to fetch emails. Make sure your Gmail is connected in Settings.";
       if (axios.isAxiosError(err) && err.response?.data?.error) {
         errorMessage = err.response.data.error;
@@ -54,11 +64,20 @@ export default function GmailList() {
       setError(errorMessage);
     } finally {
       setLoading(false);
+      isFetching.current = false;
     }
   };
 
   useEffect(() => {
-    loadEmails();
+    // Add a small delay to ensure auth headers are settled
+    const timer = setTimeout(() => {
+      loadEmails();
+    }, 500);
+    
+    return () => {
+      clearTimeout(timer);
+      isFetching.current = false;
+    };
   }, []);
 
   return (

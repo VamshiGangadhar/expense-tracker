@@ -8,7 +8,11 @@ import API_CONFIG from "./api-config";
  */
 export const fetchEmails = async (startDate?: string, endDate?: string) => {
   try {
-    const token = localStorage.getItem("expense_tracker_token");
+    const token = typeof window !== "undefined" ? localStorage.getItem("expense_tracker_token") : null;
+    
+    if (!token) {
+      throw new Error("No authentication token found. Please log in again.");
+    }
     
     const response = await axios.get(`${API_CONFIG.BASE_URL}/api/google/emails`, {
       headers: {
