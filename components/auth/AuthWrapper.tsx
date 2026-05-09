@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import Login from "./Login";
 import Signup from "./Signup";
 import Settings from "../settings/Settings"; // Import the new component
