@@ -21,8 +21,12 @@ export const fetchEmails = async (startDate?: string, endDate?: string) => {
     });
 
     return response.data; // Returns { total: count, emails: [...] }
-  } catch (error: any) {
-    console.error("Error fetching emails:", error.response?.data || error.message);
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error("Error fetching emails:", error.response?.data || error.message);
+    } else {
+      console.error("Error fetching emails:", error);
+    }
     throw error;
   }
 };

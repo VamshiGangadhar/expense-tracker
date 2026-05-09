@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { fetchEmails } from "@/lib/gmail";
+import axios from "axios";
 import {
   Table,
   TableBody,
@@ -45,8 +46,12 @@ export default function GmailList() {
 
       const data = await fetchEmails(startDateStr, endDateStr);
       setEmails(data.emails || []);
-    } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to fetch emails. Make sure your Gmail is connected in Settings.");
+    } catch (err: unknown) {
+      let errorMessage = "Failed to fetch emails. Make sure your Gmail is connected in Settings.";
+      if (axios.isAxiosError(err) && err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

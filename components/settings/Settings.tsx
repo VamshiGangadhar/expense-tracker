@@ -19,7 +19,7 @@ export default function Settings() {
       if (response.data.url) {
         window.location.href = response.data.url;
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error fetching Google Auth URL:", error);
       alert("Failed to connect to Google.");
     } finally {
